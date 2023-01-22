@@ -16,10 +16,10 @@ namespace JobAPIS.Controllers
         {
             _jobService = jobService;
         }
-        [HttpGet("GetAllJobs")]
-        public async Task<ActionResult<ServiceResponse<List<GetJobDto>>>> GetAllJobs()
+        [HttpGet("GetAllJobs{id}")]
+        public async Task<ActionResult<ServiceResponse<List<GetJobDto>>>> GetAllJobs(int id)
         {
-            return Ok(await _jobService.GetAllJobs());
+            return Ok(await _jobService.GetAllJobs(id));
         }
 
         [HttpGet("GetJobByID{id}")]

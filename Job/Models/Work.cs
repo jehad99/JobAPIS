@@ -1,4 +1,6 @@
-﻿namespace JobAPIS.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace JobAPIS.Models
 {
     public class Work
     {
