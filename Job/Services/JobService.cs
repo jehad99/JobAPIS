@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using JobAPIS.Data;
 using JobAPIS.DTOs;
+using JobAPIS.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace JobAPIS.Services
@@ -21,18 +22,81 @@ namespace JobAPIS.Services
             try
             {
                 Applicant applicant = _mapper.Map<Applicant>(newApplicant);
+                var name = applicant.FirstName + " " + applicant.LastName;
                 var applicants = await _context.Applicants.ToListAsync();
-                _context.Applicants.Add(applicant);
-                await _context.SaveChangesAsync();
-                foreach (char c in applicant.Name)
+                var emailExist = _context.Applicants.Any(a => a.Email == applicant.Email);
+
+                foreach (char c in name)
                 {
-                    if (!Char.IsLetter(c))
+                    if (!Char.IsLetter(c) && !Char.IsWhiteSpace(c))
                     {
                         response.Status = false;
                         response.Message = "Name should contain only Letters";
                         return response;
                     }
                 }
+                if (applicant.Email != null && !applicant.Email.Contains("@") && !applicant.Email.Contains("."))
+                {
+                    response.Status = false;
+                    response.Message = "Email should be valid";
+                    return response;
+                }
+                else if (applicant.Email == null)
+                {
+                    response.Status = false;
+                    response.Message = "Email exist";
+                    return response;
+                }
+                else if (emailExist == true)
+                {
+                    response.Status = false;
+                    response.Message = "Email is required";
+                    return response;
+                }
+                else if (applicant.FirstName == null)
+                {
+                    response.Status = false;
+                    response.Message = "First name is required";
+                    return response;
+                }
+                else if (applicant.LastName == null)
+                {
+                    response.Status = false;
+                    response.Message = "Lasr name is required";
+                    return response;
+                }
+                else if (applicant.FirstName == null)
+                {
+                    response.Status = false;
+                    response.Message = "First name is required";
+                    return response;
+                }
+                else if (applicant.Phone == null)
+                {
+                    response.Status = false;
+                    response.Message = "Phone number is required";
+                    return response;
+                }
+                int count = 0;
+                foreach (char c in applicant.Phone)
+                {
+                    if (!Char.IsDigit(c))
+                    {
+                        response.Status = false;
+                        response.Message = "Phone number should contain numbers only";
+                        return response;
+                    }
+                    count++;
+                }
+                if (count != 11)
+                {
+                    response.Status = false;
+                    response.Message = "Phone number should contain 11 numbers";
+                    return response;
+                }
+                _context.Applicants.Add(applicant);
+                await _context.SaveChangesAsync();
+                
                 response.Data = await _context.Applicants
                     .Select(c => _mapper.Map<GetApplicantDto>(c)).ToListAsync();
             }

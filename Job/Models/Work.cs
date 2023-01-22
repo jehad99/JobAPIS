@@ -3,9 +3,9 @@
     public class Work
     {
         public int Id { get; set; }
-        public string Name { get; set; } = "Frontend Developer";
-        public string Description { get; set; } = "UI developer";
-        public string JobRequirements { get; set; } = "2years exp, skills:html-css-js";
+        public string? Name { get; set; }
+        public string? Description { get; set; } 
+        public string? JobRequirements { get; set; }
         public Career? Career { get; set; }
         public List<Applicant>? Applicants { get; set; } 
     }
