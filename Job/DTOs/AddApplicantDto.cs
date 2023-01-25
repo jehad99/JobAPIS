@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Newtonsoft.Json.Serialization;
+using System.ComponentModel.DataAnnotations;
 using System.Configuration;
 
 namespace JobAPIS.DTOs
@@ -19,8 +20,8 @@ namespace JobAPIS.DTOs
 
         [Required]
         [Phone]
-        [Range(11, 11, ErrorMessage = "The field Phone must be 11 numbers")]
-        public string Phone { get; set; }
+        [MaxLength(11), MinLength(11)]
+        public string Phone { get; set; } = "12345678911";
 
         [Required]
         [Range(1, int.MaxValue)]

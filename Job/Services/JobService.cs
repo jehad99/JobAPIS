@@ -44,6 +44,20 @@ namespace JobAPIS.Services
                         return response;
                     }
                 }
+                var emailExist = _context.Applicants.Any(a => a.Email == applicant.Email);
+                var phoneExist = _context.Applicants.Any(a => a.Phone == applicant.Phone);
+                if (emailExist == true)
+                {
+                    response.Status = false;
+                    response.Message = "Email exist";
+                    return response;
+                }
+                if (phoneExist == true)
+                {
+                    response.Status = false;
+                    response.Message = "Phone number exist";
+                    return response;
+                }
                 job?.Applicants.Add(applicant);
                 await _context.SaveChangesAsync();
 
