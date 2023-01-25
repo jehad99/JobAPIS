@@ -8,8 +8,8 @@ namespace JobAPIS.Data
         {
 
         }
-        public DbSet<Applicant> Applicants => Set<Applicant>();
-        public DbSet<Career> Careers => Set<Career>();
-        public DbSet<Work> Jobs => Set<Work>();
+        public DbSet<Applicant> Applicants { get; set; }
+        public DbSet<Career> Careers { get; set; }
+        public DbSet<Work> Jobs { get; set; }
     }
 }

@@ -8,21 +8,16 @@ namespace JobAPIS.Controllers
     [ApiController]
     [Route("[controller]")]
 
-    public class JobController:ControllerBase
+    public class JobsController:ControllerBase
     {
         private readonly IJobService _jobService;
 
-        public JobController(IJobService jobService)
+        public JobsController(IJobService jobService)
         {
             _jobService = jobService;
         }
-        [HttpGet("GetAllJobs{id}")]
-        public async Task<ActionResult<ServiceResponse<List<GetJobDto>>>> GetAllJobs(int id)
-        {
-            return Ok(await _jobService.GetAllJobs(id));
-        }
 
-        [HttpGet("GetJobByID{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<ServiceResponse<GetJobDto>>> GetSingleJob(int id)
         {
             return Ok(await _jobService.GetJobById(id));

@@ -3,6 +3,7 @@ using JobAPIS.Data;
 using JobAPIS.DTOs;
 using JobAPIS.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Xml.Linq;
 
 namespace JobAPIS.Services
 {
@@ -16,17 +17,24 @@ namespace JobAPIS.Services
             _context = context;
             _mapper = mapper;
         }
-        public async Task<ServiceResponse<List<GetApplicantDto>>> AddApplicant(AddApplicantDto newApplicant)
+        
+        public async Task<ServiceResponse<GetApplicantDto>> AddApplicant(AddApplicantDto newApplicant)
         {
-            var response = new ServiceResponse<List<GetApplicantDto>>();
+            var response = new ServiceResponse<GetApplicantDto>();
             try
             {
+                var job = await _context.Jobs
+                    .Include(j => j.Applicants)
+                    //.Where(j => j.Id == newApplicant.JobId)
+                    .FirstOrDefaultAsync(j => j.Id == newApplicant.JobId);
+                if (job == null) 
+                {
+                    response.Status = false;
+                    response.Message = "JobId not found";
+                    return response;
+                }
                 Applicant applicant = _mapper.Map<Applicant>(newApplicant);
                 var name = applicant.FirstName + " " + applicant.LastName;
-                var applicants = await _context.Applicants.ToListAsync();
-                var emailExist = _context.Applicants.Any(a => a.Email == applicant.Email);
-                var phoneExist = _context.Applicants.Any(a => a.Phone == applicant.Phone);
-
                 foreach (char c in name)
                 {
                     if (!Char.IsLetter(c) && !Char.IsWhiteSpace(c))
@@ -36,71 +44,10 @@ namespace JobAPIS.Services
                         return response;
                     }
                 }
-                if (applicant.Email == null)
-                {
-                    response.Status = false;
-                    response.Message = "Email is required";
-                    return response;
-                }
-                else if (!applicant.Email.Contains('@') || !applicant.Email.Contains('.'))
-                {
-                    response.Status = false;
-                    response.Message = "Email should be valid";
-                    return response;
-                }
-                else if (emailExist == true)
-                {
-                    response.Status = false;
-                    response.Message = "Email exist";
-                    return response;
-                }
-                else if (applicant.FirstName == null)
-                {
-                    response.Status = false;
-                    response.Message = "First name is required";
-                    return response;
-                }
-                else if (applicant.LastName == null)
-                {
-                    response.Status = false;
-                    response.Message = "Last name is required";
-                    return response;
-                }
-              
-                else if (applicant.Phone == null)
-                {
-                    response.Status = false;
-                    response.Message = "Phone number is required";
-                    return response;
-                }
-                else if (phoneExist == true)
-                {
-                    response.Status = false;
-                    response.Message = "Phone number exist";
-                    return response;
-                }
-                int count = 0;
-                foreach (char c in applicant.Phone)
-                {
-                    if (!Char.IsDigit(c))
-                    {
-                        response.Status = false;
-                        response.Message = "Phone number should contain numbers only";
-                        return response;
-                    }
-                    count++;
-                }
-                if (count != 11)
-                {
-                    response.Status = false;
-                    response.Message = "Phone number should contain 11 numbers";
-                    return response;
-                }
-                _context.Applicants.Add(applicant);
+                job?.Applicants.Add(applicant);
                 await _context.SaveChangesAsync();
-                
-                response.Data = await _context.Applicants
-                    .Select(c => _mapper.Map<GetApplicantDto>(c)).ToListAsync();
+
+                response.Data = _mapper.Map<GetApplicantDto>(applicant);
             }
             catch (Exception ex)
             {
@@ -127,19 +74,18 @@ namespace JobAPIS.Services
             return response;
         }
 
-        public async Task<ServiceResponse<List<GetJobDto>>> GetAllJobs(int id)
+        //return Name column from Jobs db with specific career
+        public async Task<ServiceResponse<List<GetJobNameDto>>> GetAllJobs(int id)
         {
-            var response = new ServiceResponse<List<GetJobDto>>();
+            var response = new ServiceResponse<List<GetJobNameDto>>();
             try
             {
-               
                 var jobs = await _context.Jobs
-                    .Include(j => j.Career)
-                    .Where(j => j.Career != null && j.Career.Id == id).ToListAsync();
-                await _context.SaveChangesAsync();
-                response.Data = jobs.Select(j => _mapper.Map<GetJobDto>(j)).ToList();
+                    .Where(j => j.Career.Id == id)
+                    .ToListAsync();
+                response.Data =  _mapper.Map<List<GetJobNameDto>>(jobs);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 response.Status = false;
                 response.Message = ex.Message;

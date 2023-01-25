@@ -4,17 +4,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JobAPIS.Controllers
 {
-    public class ApplicantController:ControllerBase
+    [ApiController]
+    [Route("[controller]")]
+    public class ApplicantsController:ControllerBase
     {
         private readonly IJobService _jobService;
 
-        public ApplicantController(IJobService jobService)
+        public ApplicantsController(IJobService jobService)
         {
             _jobService = jobService;
         }
 
-        [HttpPost("Applicant")]
-        public async Task<ActionResult<ServiceResponse<List<GetApplicantDto>>>> AddApplicant(AddApplicantDto newApplicant)
+        [HttpPost()]
+        public async Task<ActionResult<ServiceResponse<AddApplicantDto>>> AddApplicant(AddApplicantDto newApplicant)
         {
             return Ok(await _jobService.AddApplicant(newApplicant));
         }
